@@ -279,7 +279,10 @@
         <td>${u.loginCount}</td>
         <td>${u.postCount} / ${u.commentCount}</td>
         <td class="mono" style="font-size:11px">${App.esc(u.ips.join(', ') || u.loginIp || '—')}</td>
-        <td><button class="btn tiny ghost" data-ban="${App.esc(u.loginIp || u.ips[0] || '')}">封禁 IP</button></td>
+        <td style="white-space:nowrap">
+          <button class="btn tiny ghost" data-ban="${App.esc(u.loginIp || u.ips[0] || '')}">封禁 IP</button>
+          <button class="btn tiny ghost danger" data-del="${App.esc(u.id)}" data-name="${App.esc(u.label)}" data-content="${u.postCount + u.commentCount}">删除</button>
+        </td>
       </tr>`).join('') || '<tr><td colspan="9" class="muted">还没有人登记</td></tr>';
     $$('#visitor-table [data-ban]').forEach((b) => {
       b.addEventListener('click', () => {
@@ -287,6 +290,31 @@
         banIp(b.dataset.ban, '来自访客档案');
       });
     });
+    $$('#visitor-table [data-del]').forEach((b) => {
+      b.addEventListener('click', () => deleteVisitor(b.dataset.del, b.dataset.name, Number(b.dataset.content) || 0));
+    });
+  }
+
+  // 删掉一个访客：先确认，再问要不要连内容一起删
+  async function deleteVisitor(uid, label, contentCount) {
+    if (!uid) return;
+    const sure = confirm(`确定删掉「${label}」这个访客？\n\n会删掉：登记档案、登录会话、他的访问记录。`);
+    if (!sure) return;
+    let mode = 'keep';
+    if (contentCount > 0) {
+      const withContent = confirm(
+        `他发过 ${contentCount} 条回忆/评论。\n\n点「确定」= 连内容一起删掉\n点「取消」= 只删账号，内容保留（作者显示为已注销）`
+      );
+      mode = withContent ? 'delete' : 'keep';
+    }
+    try {
+      const r = await App.api(`/api/admin/visitors/${encodeURIComponent(uid)}?content=${mode}`, { method: 'DELETE' });
+      const x = r.removed || {};
+      App.toast(`已删除「${r.label || label}」：访问记录 ${x.visits || 0} 条、回忆 ${x.posts || 0} 条、评论 ${x.comments || 0} 条`, 'ok');
+      loadVisitors();
+    } catch (e) {
+      App.toast(e.message || '删除失败', 'err');
+    }
   }
   $('#visitor-search').addEventListener('input', App.debounce(renderVisitors, 200));
 

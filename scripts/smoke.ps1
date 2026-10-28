@@ -544,6 +544,19 @@ if (-not $AdminPassword) {
     Api -Method POST -Path "/api/admin/monitor/users/$($script:u2.user.id)/kick" -Session $SD | Out-Null
     $null -eq (Api -Path '/api/me' -Session $SU).user
   }
+  Check '访问日志上限是 10 万条' {
+    $ov = Api -Path '/api/admin/overview' -Session $SD
+    $ov.retention.maxVisits -eq 100000
+  }
+  Check '能删掉一个访客（档案 + 访问记录，重复删 404）' {
+    Api -Method POST -Path '/api/register' -Session $SU -Body @{ who = '1999级2班 临时访客'; password = 'tmp12345' } | Out-Null
+    Api -Path '/api/me' -Session $SU | Out-Null
+    $tmpId = (Api -Path '/api/me' -Session $SU).user.id
+    $del = Api -Method DELETE -Path "/api/admin/visitors/$tmpId" -Session $SD
+    $code = ApiStatus -Method DELETE -Path "/api/admin/visitors/$tmpId" -Session $SD
+    $left = @((Api -Path '/api/admin/visitors' -Session $SD).items | Where-Object { $_.id -eq $tmpId }).Count
+    $del.ok -eq $true -and $del.removed.visits -ge 1 -and $code -eq 404 -and $left -eq 0
+  }
 
   # 收尾清理：删掉自检造出来的文档记录（连带它发上墙的回忆）
   foreach ($f in (Api -Path '/api/admin/monitor/files' -Session $SD).items) {

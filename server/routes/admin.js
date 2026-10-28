@@ -178,6 +178,69 @@ router.get('/visitors', (req, res) => {
   res.json({ items: users });
 });
 
+/* ------------------------------ 删掉一个访客 ------------------------------ */
+// DELETE /api/admin/visitors/:uid?content=keep|delete
+// keep（默认）：只删档案、会话和访问记录，他发过的回忆保留（作者显示为已注销）
+// delete：连他发过的回忆、评论、上传的文件一起删
+router.delete('/visitors/:uid', (req, res) => {
+  const uid = String(req.params.uid || '');
+  const user = store.getUser(uid);
+  if (!user) return res.status(404).json({ error: '没找到这个校友' });
+  const mode = String(req.query.content || 'keep') === 'delete' ? 'delete' : 'keep';
+  const label = `${gradeLabel(user.year)}${user.className ? user.className + '班' : ''}${user.name}`;
+
+  const sessions = store.dropSessionsOf(uid);
+
+  const vBefore = store.data.visits.length;
+  store.data.visits = store.data.visits.filter((v) => v.uid !== uid);
+  const visitsDeleted = vBefore - store.data.visits.length;
+
+  store.data.users = store.data.users.filter((u) => u.id !== uid);
+
+  let postsDeleted = 0;
+  let commentsDeleted = 0;
+  let filesDeleted = 0;
+  const postIds = new Set(store.data.posts.filter((p) => p.uid === uid).map((p) => p.id));
+  const fileIds = new Set(store.data.files.filter((f) => f.uploaderId === uid).map((f) => f.id));
+
+  if (mode === 'delete') {
+    postsDeleted = store.data.posts.filter((p) => p.uid === uid).length;
+    store.data.posts = store.data.posts.filter((p) => {
+      if (p.uid !== uid) return true;
+      if (p.docId) docx.removePostDir(p.id);
+      return false;
+    });
+    const cBefore = store.data.comments.length;
+    store.data.comments = store.data.comments.filter((c) => c.uid !== uid && !postIds.has(c.postId));
+    commentsDeleted = cBefore - store.data.comments.length;
+    filesDeleted = store.data.files.filter((f) => f.uploaderId === uid).length;
+    store.data.files = store.data.files.filter((f) => f.uploaderId !== uid);
+  } else {
+    // 保留内容：把作者挂空，别在墙上显示成一串内部 ID
+    store.data.posts.forEach((p) => {
+      if (p.uid === uid) { p.uid = null; p.authorDeleted = true; }
+    });
+    store.data.comments.forEach((c) => {
+      if (c.uid === uid) { c.uid = null; c.authorDeleted = true; }
+    });
+    store.data.files.forEach((f) => {
+      if (f.uploaderId === uid) { f.uploaderId = null; f.uploaderLabel = '（已注销）'; }
+    });
+  }
+
+  store.addEvent('visitor-delete', {
+    uid, label, mode, visits: visitsDeleted, posts: postsDeleted, comments: commentsDeleted, files: filesDeleted, sessions,
+  }, req);
+  store.touch();
+
+  res.json({
+    ok: true,
+    label,
+    mode,
+    removed: { visits: visitsDeleted, posts: postsDeleted, comments: commentsDeleted, files: filesDeleted, sessions },
+  });
+});
+
 /* ------------------------------ 登录记录 ------------------------------ */
 router.get('/logins', (req, res) => {
   const items = store.data.events

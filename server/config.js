@@ -107,8 +107,8 @@ const config = {
   // 在线判定窗口
   ONLINE_WINDOW_MS: 1000 * 60 * 5,
   // 访问日志最多保留多少条（环形缓冲，超出丢弃最旧的）
-  MAX_VISITS: 50000,
-  MAX_EVENTS: 5000,
+  MAX_VISITS: Number(process.env.MAX_VISITS || 100000),
+  MAX_EVENTS: Number(process.env.MAX_EVENTS || 5000),
   // 学校建校年份（用于生成"级"下拉）
   GRADE_MIN: 1956,
   GRADE_MAX: new Date().getFullYear(),

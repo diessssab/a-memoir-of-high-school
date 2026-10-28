@@ -86,6 +86,9 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; letter-spacing: 0.
 .btn.tiny { padding: 3px 8px; font-size: 12px; border-radius: 3px; }
 .btn.block { width: 100%; }
 .btn.icon { padding: 6px 9px; }
+/* 危险操作（删访客、删文件）的按钮：平时低调，悬停才泛红 */
+.btn.ghost.danger { color: var(--red); border-color: rgba(168, 52, 42, 0.35); }
+.btn.ghost.danger:hover { --btn-bg: rgba(168, 52, 42, 0.08); }
 
 .field { margin-bottom: 16px; }
 .field > label {
