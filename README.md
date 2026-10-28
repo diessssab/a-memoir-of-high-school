@@ -1,4 +1,4 @@
-# 廊坊一中回忆录
+# 某某中回忆录
 
 *An open-source template for a high-school memoir site —— 校友回忆墙 + 站长后台，clone 下来改成自己学校就能用。*
 
