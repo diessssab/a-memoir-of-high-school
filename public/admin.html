@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page="后台监控">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台监控 · 廊坊一中回忆录</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<!-- 未登录：密码门 -->
+<div class="gate" id="gate">
+  <div class="login-card">
+    <h2>站长后台</h2>
+    <p class="sub">这里能看到所有访客行为。密码在 <code>data/.admin-password</code> 或环境变量 <code>ADMIN_PASSWORD</code>。</p>
+    <div class="form-error" id="gate-error"></div>
+    <div class="field">
+      <label for="admin-pwd">管理密码</label>
+      <input class="input" id="admin-pwd" type="password" placeholder="输入管理密码" autocomplete="current-password">
+    </div>
+    <button class="btn block" id="gate-btn">进入后台</button>
+    <div class="login-foot">
+      <span>连续输错会被临时锁定</span>
+      <a href="/wall.html">回前台 →</a>
+    </div>
+  </div>
+</div>
+
+<!-- 已登录 -->
+<div id="shell" class="hidden">
+  <header class="topbar">
+    <a class="brand" href="/wall.html" id="shell-title">廊坊一中回忆录<small>ADMIN</small></a>
+    <nav>
+      <a href="/wall.html">前台</a>
+      <a href="/monitor.html">监控中心 ↗</a>
+    </nav>
+    <span class="spacer"></span>
+    <div class="me">
+      <span class="live-dot"></span>
+      <span id="clock" class="mono" style="font-size:12px"></span>
+      <button class="btn ghost small" id="logout-btn">退出后台</button>
+    </div>
+  </header>
+
+  <main class="page-wrap">
+    <div class="admin-nav" id="admin-nav">
+      <button data-tab="overview" class="on">概览</button>
+      <button data-tab="live">实时访问</button>
+      <button data-tab="visitors">访客档案</button>
+      <button data-tab="logins">登录记录</button>
+      <button data-tab="accounts">密码管控</button>
+      <button data-tab="posts">内容管理</button>
+      <button data-tab="import">导入回忆</button>
+      <button data-tab="settings">站点设置</button>
+    </div>
+
+    <!-- 概览 -->
+    <section id="tab-overview">
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="panel">
+        <h3>近 24 小时访问量</h3>
+        <div class="panel-sub">每根柱子是一小时，把鼠标放上去能看到具体数字。</div>
+        <div class="chart" id="chart"></div>
+        <div class="chart-x"><span>-24h</span><span>-18h</span><span>-12h</span><span>-6h</span><span>现在</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="two-col">
+        <div class="panel">
+          <h3>访问最多的页面</h3>
+          <div class="panel-sub">今天的数据。</div>
+          <div id="top-paths"></div>
+        </div>
+        <div class="panel">
+          <h3>可疑访问</h3>
+          <div class="panel-sub">今天请求异常多、或频繁出错的 IP。</div>
+          <div id="suspicious"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>最近事件</h3>
+        <div class="panel-sub">登记、发布、删除、封禁等关键动作。</div>
+        <div class="scroll-y"><div id="events"></div></div>
+      </div>
+    </section>
+
+    <!-- 实时访问 -->
+    <section id="tab-live" class="hidden">
+      <div class="panel">
+        <div class="row wrap" style="margin-bottom:12px">
+          <h3 style="margin:0">实时访问流</h3>
+          <span class="spacer"></span>
+          <label style="font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:6px">
+            <input type="checkbox" id="only-bad"> 只看错误/越权请求
+          </label>
+          <button class="btn ghost small" id="live-pause">暂停刷新</button>
+          <button class="btn ghost small" id="refresh-live">刷新</button>
+        </div>
+        <div class="panel-sub">每 3 秒自动刷新，只显示最近 300 条。静态资源请求不记录。</div>
+        <div class="table-wrap scroll-y">
+          <table class="data" id="live-table">
+            <thead><tr><th>时间</th><th>IP</th><th>身份</th><th>方法</th><th>路径</th><th>状态</th><th>耗时</th><th>来源</th><th>设备</th><th>操作</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 访客档案 -->
+    <section id="tab-visitors" class="hidden">
+      <div class="panel">
+        <div class="row wrap" style="margin-bottom:12px">
+          <h3 style="margin:0">访客档案</h3>
+          <span class="spacer"></span>
+          <input class="input" id="visitor-search" placeholder="按级别 / 姓名 / IP 搜索" style="max-width:240px">
+          <a class="btn ghost small" href="/api/admin/export?type=users">导出 CSV</a>
+        </div>
+        <div class="panel-sub">登记过的每一个人，以及他们最后一次出现的时间。</div>
+        <div class="table-wrap scroll-y">
+          <table class="data" id="visitor-table">
+            <thead><tr><th>状态</th><th>身份</th><th>级别/班级</th><th>登记时间</th><th>最近活跃</th><th>登录次数</th><th>回忆/评论</th><th>IP</th><th>操作</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 登录记录 -->
+    <section id="tab-logins" class="hidden">
+      <div class="panel">
+        <h3>登录 / 鉴权记录</h3>
+        <div class="panel-sub">包括后台密码输错的尝试。</div>
+        <div class="table-wrap scroll-y">
+          <table class="data" id="login-table">
+            <thead><tr><th>时间</th><th>类型</th><th>身份</th><th>IP</th><th>UA</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 内容管理 -->
+    <section id="tab-posts" class="hidden">
+      <div class="panel">
+        <div class="row wrap" style="margin-bottom:12px">
+          <h3 style="margin:0">回忆管理</h3>
+          <span class="spacer"></span>
+          <input class="input" id="post-search" placeholder="搜内容 / 作者" style="max-width:220px">
+          <label style="font-size:13px;display:flex;align-items:center;gap:6px;color:var(--ink-soft)">
+            <input type="checkbox" id="only-hidden"> 只看隐藏/待审核
+          </label>
+          <a class="btn ghost small" href="/api/admin/export?type=posts">导出 CSV</a>
+        </div>
+        <div id="post-list"></div>
+      </div>
+      <div class="panel">
+        <div class="row" style="margin-bottom:10px">
+          <h3 style="margin:0">评论管理</h3>
+          <span class="spacer"></span>
+          <button class="btn ghost small" id="refresh-comments">刷新</button>
+        </div>
+        <div class="table-wrap scroll-y">
+          <table class="data" id="comment-table">
+            <thead><tr><th>时间</th><th>作者</th><th>内容</th><th>IP</th><th>操作</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 导入 -->
+    <section id="tab-import" class="hidden">
+      <div class="panel">
+        <h3>从金山文档导入回忆</h3>
+        <div class="panel-sub">
+          三种方式任选：<b>文件导入</b>最稳（在金山文档里 文件 → 下载/导出 → Word(.docx) 或 纯文本(.txt)）；
+          <b>粘贴文本</b>适合少量内容；<b>链接导入</b>仅对公开无权限的分享链接可能生效。
+        </div>
+
+        <div class="tabs-sub" id="import-tabs">
+          <button data-im="file" class="on">文件导入</button>
+          <button data-im="doc">整篇文档</button>
+          <button data-im="url">链接导入</button>
+          <button data-im="text">粘贴文本</button>
+        </div>
+
+        <div id="im-file">
+          <div class="import-zone" id="drop-zone">
+            <div style="font-size:15px;margin-bottom:6px">把文件拖进来，或点击选择</div>
+            <div id="import-limit-text">支持 .docx / .txt / .md / .csv / .html，单文件最大 2.5GB</div>
+          </div>
+          <input type="file" id="import-file" accept=".docx,.txt,.md,.html,.htm,.csv" hidden>
+        </div>
+
+        <div id="im-doc" class="hidden">
+          <div class="panel-sub" style="margin-bottom:12px">
+            <b>整份文档 = 一条回忆。</b>段落、标题、表格顺序都保留，文档里的照片会一张张抽出来插在原位置
+            —— 适合「一个年级/一个班的回忆录」这种本来就写在一份 Word 里的东西。
+          </div>
+          <div class="row wrap" style="gap:14px;margin-bottom:12px">
+            <div class="field" style="margin:0;flex:1;min-width:200px">
+              <label for="doc-title">标题（留空就用文件名）</label>
+              <input class="input" id="doc-title" placeholder="廊坊一中回忆录 2023级">
+            </div>
+            <div class="field" style="margin:0;max-width:130px">
+              <label for="doc-year">级别（如 2023）</label>
+              <input class="input" id="doc-year" placeholder="自动识别">
+            </div>
+            <div class="field" style="margin:0;max-width:180px">
+              <label for="doc-author">署名（留空自动填）</label>
+              <input class="input" id="doc-author" placeholder="2023级合集">
+            </div>
+          </div>
+          <div class="import-zone" id="doc-zone">
+            <div style="font-size:15px;margin-bottom:6px">把这份 .docx 拖进来，或点击选择</div>
+            <div>整篇保留照片只有 .docx 行；.txt / .md / .html 会当纯文本发一条</div>
+          </div>
+          <input type="file" id="doc-file" accept=".docx,.txt,.md,.html,.htm,.csv" hidden>
+          <div id="doc-prog" class="hidden" style="margin-top:12px;font-size:13px;color:var(--ink-soft)"></div>
+          <div id="doc-result" class="hidden" style="margin-top:14px"></div>
+        </div>
+
+        <div id="im-url" class="hidden">
+          <div class="field">
+            <label for="import-url">金山文档分享链接</label>
+            <input class="input" id="import-url" placeholder="https://kdocs.cn/l/xxxxxxxx">
+            <div class="hint">要求该链接的分享权限是「获得链接的人可查看」。若提示需要登录，请改用文件导入。</div>
+          </div>
+          <button class="btn" id="do-import-url">尝试抓取</button>
+        </div>
+
+        <div id="im-text" class="hidden">
+          <div class="field">
+            <label for="import-text">粘贴内容</label>
+            <textarea class="textarea" id="import-text" style="min-height:200px"
+              placeholder="从金山文档里复制正文粘贴到这里。可以用「98级3班 张三」这样的署名行分隔不同人的回忆，空行也可以分段。"></textarea>
+          </div>
+          <button class="btn" id="do-import-text">解析内容</button>
+        </div>
+      </div>
+
+      <div class="panel hidden" id="preview-panel">
+        <div class="row wrap" style="margin-bottom:10px">
+          <h3 style="margin:0">解析结果</h3>
+          <span class="tag" id="preview-count">0 条</span>
+          <span class="spacer"></span>
+          <label style="font-size:13px;display:flex;align-items:center;gap:6px;color:var(--ink-soft)">
+            <input type="checkbox" id="preview-raw-toggle"> 看原始文本
+          </label>
+          <button class="btn ghost small" id="preview-clear">清空</button>
+          <button class="btn" id="preview-commit">确认导入</button>
+        </div>
+        <div class="panel-sub">导入前可以逐条改：级别、班级、姓名、标题、内容。级别/班级/姓名可留空（会显示为"佚名校友"）。</div>
+        <pre id="preview-raw" class="hidden" style="max-height:260px;overflow:auto;background:rgba(0,0,0,.04);padding:12px;font-size:12px;font-family:var(--mono);white-space:pre-wrap"></pre>
+        <div class="entry-list" id="entry-list"></div>
+      </div>
+    </section>
+
+    <!-- 密码管控 -->
+    <section id="tab-accounts" class="hidden">
+      <div class="panel">
+        <h3>密码总览</h3>
+        <div class="panel-sub">谁设了密码、谁忘了密码、谁被锁住了 —— 一格一格看。</div>
+        <div class="stat-grid" id="pwd-stats"></div>
+      </div>
+
+      <div class="panel">
+        <h3>密码策略</h3>
+        <div class="panel-sub">站长定的规矩，改完立即对所有人生效。</div>
+        <div class="row wrap" style="gap:16px">
+          <div class="field" style="margin:0;max-width:150px">
+            <label for="p-min">最短位数</label>
+            <input class="input" id="p-min" type="number" min="1" max="72">
+          </div>
+          <div class="field" style="margin:0;max-width:150px">
+            <label for="p-fail">连错几次锁定</label>
+            <input class="input" id="p-fail" type="number" min="0" max="99">
+          </div>
+          <div class="field" style="margin:0;max-width:170px">
+            <label for="p-lock">锁定分钟数</label>
+            <input class="input" id="p-lock" type="number" min="0" max="43200">
+          </div>
+        </div>
+        <div class="row wrap" style="gap:22px;margin:14px 0 16px">
+          <label style="font-size:14px;display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="p-force"> 站长重置密码后，强制下次登录改密码
+          </label>
+          <label style="font-size:14px;display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="p-self"> 允许校友自己改密码
+          </label>
+        </div>
+        <button class="btn" id="save-policy">保存策略</button>
+      </div>
+
+      <div class="panel">
+        <h3>账号与密码</h3>
+        <div class="panel-sub">
+          重置后只在这里显示一次临时密码，记下来告诉本人（微信/电话）。重置会把该账号所有已登录的设备踢下线。
+        </div>
+        <div class="row wrap" style="margin-bottom:12px">
+          <input class="input" id="acc-q" placeholder="搜届别 / 姓名 / IP" style="max-width:240px">
+          <select class="select" id="acc-status" style="max-width:180px">
+            <option value="">全部账号</option>
+            <option value="nopwd">还没设密码</option>
+            <option value="weak">密码很短（&lt;6 位）</option>
+            <option value="locked">被锁定</option>
+            <option value="mustchange">待改密码</option>
+            <option value="fail">有输错记录</option>
+          </select>
+          <button class="btn ghost small" id="acc-refresh">刷新</button>
+          <a class="btn ghost small" href="/api/admin/export?type=accounts">导出账号表</a>
+          <span class="spacer"></span>
+          <span class="muted" style="font-size:12px" id="acc-count"></span>
+        </div>
+        <div class="form-hint-box hidden" id="pwd-result"></div>
+        <div id="account-list"></div>
+      </div>
+
+      <div class="panel">
+        <h3>站长自己的后台密码</h3>
+        <div class="panel-sub" id="admin-pwd-state">后台密码默认来自 .env 里的 ADMIN_PASSWORD。</div>
+        <div class="row wrap" style="gap:16px">
+          <div class="field" style="margin:0;max-width:220px">
+            <label for="a-cur">当前后台密码</label>
+            <input class="input" id="a-cur" type="password" autocomplete="current-password" maxlength="72">
+          </div>
+          <div class="field" style="margin:0;max-width:220px">
+            <label for="a-new">新密码（至少 6 位）</label>
+            <input class="input" id="a-new" type="password" autocomplete="new-password" maxlength="72">
+          </div>
+          <div class="field" style="margin:0;max-width:220px">
+            <label for="a-new2">再输一遍</label>
+            <input class="input" id="a-new2" type="password" autocomplete="new-password" maxlength="72">
+          </div>
+        </div>
+        <div class="row wrap" style="gap:10px;margin-top:14px">
+          <button class="btn" id="save-admin-pwd">改后台密码</button>
+          <button class="btn ghost small" id="reset-admin-pwd">恢复成 .env 里的密码</button>
+        </div>
+        <div class="hint">改完之后请立刻记住：这是整站最高权限，泄露了就只能在服务器上改 .env 了。</div>
+      </div>
+
+      <div class="panel">
+        <h3>密码操作日志</h3>
+        <div class="panel-sub">重置、改密、输错、锁定，都在这里留痕。</div>
+        <div class="scroll-y"><div id="pwd-logs"></div></div>
+      </div>
+    </section>
+
+    <!-- 设置 -->
+    <section id="tab-settings" class="hidden">
+      <div class="panel">
+        <h3>站点设置</h3>
+        <div class="panel-sub" style="margin-bottom:14px">
+          站名 —— 改完点下面的「保存设置」，登录页大标题、顶栏、印章、页脚、浏览器标签会一起变。
+        </div>
+        <div class="row wrap" style="gap:12px;align-items:flex-start">
+          <div class="field" style="flex:2;min-width:200px">
+            <label for="s-school">学校名称</label>
+            <input class="input" id="s-school" maxlength="20" placeholder="例如 廊坊一中">
+            <div class="hint">显示在顶栏、印章、登录页大标题上。</div>
+          </div>
+          <div class="field" style="flex:3;min-width:220px">
+            <label for="s-title">站点全称</label>
+            <input class="input" id="s-title" maxlength="40" placeholder="留空自动用「学校名称 + 回忆录」">
+            <div class="hint">浏览器标签页和页脚用它。改学校名称时它会自动跟着改；你手动填过就不再自动改。</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="s-school-en">英文名（可选）</label>
+          <input class="input" id="s-school-en" maxlength="60" placeholder="留空就不显示这行小字">
+          <div class="hint">登录页左侧大标题上方那行英文。</div>
+        </div>
+        <div class="brand-preview">
+          <div class="bp-label">效果预览（边打边变）</div>
+          <div class="bp-card">
+            <div class="bp-kicker" id="bp-en">LANGFANG NO.1 MIDDLE SCHOOL</div>
+            <div class="bp-h1"><span id="bp-school">廊坊一中</span><br><span class="accent">回忆录</span></div>
+            <div class="bp-line"><span class="bp-seal" id="bp-seal">廊坊一中</span><span id="bp-foot">廊坊一中回忆录 · 由校友共同守护</span></div>
+            <div class="bp-tab">标签页：<span id="bp-tab">廊坊一中回忆录 · 入院登记</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="s-notice">登录页公告</label>
+          <input class="input" id="s-notice" maxlength="300" placeholder="例如：本站仅限本校校友使用，请填写真实级别姓名">
+        </div>
+        <div class="field">
+          <label for="s-words">敏感词（逗号或空格分隔）</label>
+          <textarea class="textarea" id="s-words" style="min-height:80px" placeholder="命中这些词的内容会被直接拒绝提交"></textarea>
+        </div>
+        <div class="row wrap" style="gap:22px;margin:14px 0 20px">
+          <label style="font-size:14px;display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="s-open"> 允许新访客登记
+          </label>
+          <label style="font-size:14px;display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="s-review"> 新用户的第一条回忆需审核
+          </label>
+        </div>
+        <div class="panel-sub" style="margin:20px 0 10px">
+          站长联系方式 —— 显示在登录页，校友忘记密码时可以找到你
+        </div>
+        <div class="row wrap" style="gap:12px;align-items:flex-start">
+          <div class="field" style="flex:1;min-width:170px;margin-bottom:10px">
+            <label for="s-wechat">微信</label>
+            <input class="input" id="s-wechat" maxlength="60" placeholder="例如 langfang1995">
+          </div>
+          <div class="field" style="flex:1;min-width:170px;margin-bottom:10px">
+            <label for="s-qq">QQ</label>
+            <input class="input" id="s-qq" maxlength="30" placeholder="选填">
+          </div>
+        </div>
+        <div class="row wrap" style="gap:12px;align-items:flex-start">
+          <div class="field" style="flex:1;min-width:170px;margin-bottom:10px">
+            <label for="s-email">邮箱</label>
+            <input class="input" id="s-email" type="email" maxlength="120" placeholder="选填">
+          </div>
+          <div class="field" style="flex:1;min-width:170px;margin-bottom:10px">
+            <label for="s-phone">电话</label>
+            <input class="input" id="s-phone" maxlength="40" placeholder="选填">
+          </div>
+        </div>
+        <div class="field">
+          <label for="s-note">补充说明</label>
+          <input class="input" id="s-note" maxlength="200" placeholder="例如：加微信请注明「几几级 姓名」">
+          <div class="hint">微信 / QQ / 邮箱 / 电话 至少填一项，登录页才会出现「有事找站长」的入口。</div>
+        </div>
+        <label style="font-size:14px;display:flex;align-items:center;gap:8px;margin:0 0 18px">
+          <input type="checkbox" id="s-contact-on" checked> 在登录页展示这些联系方式
+        </label>
+        <button class="btn" id="save-settings">保存设置</button>
+      </div>
+
+      <div class="panel">
+        <h3>封禁名单</h3>
+        <div class="panel-sub">被封禁的 IP 访问任何接口都会被拒绝（403）。适合对付反复捣乱的人。</div>
+        <div class="row wrap" style="margin-bottom:12px">
+          <input class="input" id="ban-ip" placeholder="要封禁的 IP，例如 1.2.3.4" style="max-width:240px">
+          <input class="input" id="ban-reason" placeholder="原因（记给自己看）" style="max-width:240px">
+          <button class="btn red" id="ban-add">封禁</button>
+        </div>
+        <div id="ban-list"></div>
+      </div>
+
+      <div class="panel">
+        <h3>数据导出与清理</h3>
+        <div class="panel-sub">建议每周导出一次备份。</div>
+        <div class="row wrap">
+          <a class="btn ghost small" href="/api/admin/export?type=visits">导出访问日志</a>
+          <a class="btn ghost small" href="/api/admin/export?type=users">导出访客名册</a>
+          <a class="btn ghost small" href="/api/admin/export?type=posts">导出全部回忆</a>
+          <a class="btn ghost small" href="/api/admin/export?type=events">导出事件日志</a>
+          <span class="spacer"></span>
+          <button class="btn ghost small" id="clear-visits" style="color:var(--red)">清空访问日志</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/common.js"></script>
+<script src="/assets/admin.js"></script>
+</body>
+</html>

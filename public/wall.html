@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page="回忆墙">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回忆墙 · 廊坊一中回忆录</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%232f4a3c'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle' fill='%23bf9a4e' font-family='serif'%3E记%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="topbar"></header>
+
+<main class="page-wrap">
+  <div class="wall-head">
+    <h1>回忆墙</h1>
+    <div class="sub" id="wall-sub">把它们贴在这面墙上，谁也擦不掉。</div>
+    <span class="spacer"></span>
+    <button class="btn" id="write-btn">＋ 写下我的回忆</button>
+  </div>
+
+  <div class="filters">
+    <input class="input" id="search" type="search" placeholder="搜回忆 / 搜名字 / 搜某一年…">
+    <select class="select" id="sort" style="max-width:130px">
+      <option value="latest">最新写下</option>
+      <option value="hot">最多共鸣</option>
+    </select>
+    <button class="btn ghost small" id="mine-btn">只看我的</button>
+  </div>
+
+  <div class="year-strip" id="year-strip"></div>
+
+  <div id="wall" class="masonry"></div>
+
+  <div class="center" style="margin-top:26px">
+    <button class="btn ghost hidden" id="more-btn">再看一些</button>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="seal" data-school>廊坊一中</div>
+  <div data-site-foot>廊坊一中回忆录 · 由校友共同守护</div>
+  <div style="margin-top:6px;opacity:.7">所有访问行为均有记录，破坏内容者将被限制访问</div>
+</footer>
+
+<!-- 写回忆 -->
+<div class="modal-mask" id="write-modal">
+  <div class="modal">
+    <button class="close-x" data-close>×</button>
+    <h2>写下我的回忆</h2>
+    <p class="modal-sub" id="write-who">——</p>
+
+    <div class="field">
+      <label for="w-title">标题（选填）</label>
+      <input class="input" id="w-title" maxlength="60" placeholder="例如：三楼拐角的那台饮水机">
+    </div>
+    <div class="field">
+      <label for="w-content">内容</label>
+      <textarea class="textarea" id="w-content" maxlength="8000"
+        placeholder="哪一年、哪间教室、谁和谁、当时发生了什么。写得越具体，越像真的回到了那时候。"></textarea>
+      <div class="hint"><span id="w-count">0</span> / 8000 字 · 不支持 HTML，换行会自动保留</div>
+    </div>
+    <div class="field">
+      <label>配图（选填，最多 6 张）</label>
+      <div class="row wrap">
+        <label class="btn ghost small" style="cursor:pointer">
+          选择图片
+          <input type="file" id="w-files" accept="image/*" multiple hidden>
+        </label>
+        <span class="muted" style="font-size:12px" id="w-file-hint">jpg / png / webp，每张不超过 8MB</span>
+      </div>
+      <div class="thumbs" id="w-thumbs" style="margin-top:10px"></div>
+    </div>
+
+    <div class="field">
+      <label>或者传一份文档（选填，单份最多 500MB）</label>
+      <div class="row wrap">
+        <label class="btn ghost small" style="cursor:pointer">
+          选择文档
+          <input type="file" id="w-doc" accept=".docx,.txt,.md,.csv,.html,.htm" hidden>
+        </label>
+        <span class="muted" style="font-size:12px" id="w-doc-hint">.docx 会整篇保留照片发出去；.txt / .md / .csv / .html 会按署名拆成一条条</span>
+      </div>
+      <div class="progress hidden" id="w-doc-progress"><div class="progress-bar" id="w-doc-bar"></div></div>
+      <div class="doc-result hidden" id="w-doc-result"></div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn ghost" data-close>再想想</button>
+      <button class="btn" id="w-submit">发到墙上</button>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/common.js"></script>
+<script src="/assets/wall.js"></script>
+</body>
+</html>

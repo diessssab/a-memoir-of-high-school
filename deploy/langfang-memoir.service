@@ -1,0 +1,53 @@
+# 廊坊一中回忆录 —— systemd 服务（不用 Docker，直接在云服务器上裸跑）
+#
+# 用法：
+#   sudo cp deploy/langfang-memoir.service /etc/systemd/system/
+#   sudo nano /etc/systemd/system/langfang-memoir.service   # 改 User / 路径 / 密码
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now langfang-memoir
+#   sudo systemctl status langfang-memoir
+#   journalctl -u langfang-memoir -f          # 看日志
+#
+# 前置：服务器装 Node 20+，代码放在 /var/www/langfang-memoir，已执行 npm install --omit=dev
+#      目录所有者给这个服务用户：sudo chown -R memoir:memoir /var/www/langfang-memoir
+
+[Unit]
+Description=Langfang No.1 High School Memoir Site
+Documentation=https://example.com
+After=network.target
+
+[Service]
+Type=simple
+User=memoir
+Group=memoir
+WorkingDirectory=/var/www/langfang-memoir
+
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=TRUST_PROXY=1
+Environment=SITE_URL=https://memoir.example.com
+# 更推荐把密钥放在单独的 EnvironmentFile 里（权限 600）：
+EnvironmentFile=-/var/www/langfang-memoir/.env
+
+ExecStart=/usr/bin/node server/index.js
+
+Restart=always
+RestartSec=3
+# 连续崩溃 5 次才放弃
+StartLimitBurst=5
+StartLimitIntervalSec=300
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=memoir
+
+# ---- 基础加固 ----
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/www/langfang-memoir/data /var/www/langfang-memoir/uploads /var/www/langfang-memoir/backups
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

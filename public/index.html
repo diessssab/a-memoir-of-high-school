@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>廊坊一中回忆录 · 入院登记</title>
+<meta name="description" content="廊坊一中校友回忆录：写下你的中学时光，找回落在一起的三年。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%232f4a3c'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle' fill='%23bf9a4e' font-family='serif'%3E记%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<div class="login-page">
+  <!-- 左：黑板 -->
+  <section class="login-left">
+    <div class="inner">
+      <div class="kicker">LANGFANG NO.1 MIDDLE SCHOOL</div>
+      <h1><span data-school>廊坊一中</span><br><span class="accent">回忆录</span></h1>
+      <p class="lede">
+        黑板上的粉笔字擦掉就没了，<br>
+        操场上的脚印第二天就被扫平，<br>
+        但那些年不该只活在几个人的记忆里。<br>
+        写下你的那一段，让它在时间里留下来。
+      </p>
+      <div class="stats" id="stats">
+        <div><b id="st-post">—</b><span>回忆</span></div>
+        <div><b id="st-user">—</b><span>同窗</span></div>
+        <div><b id="st-year">—</b><span>届</span></div>
+      </div>
+    </div>
+    <div class="chalk-quote">昔我往矣 杨柳依依</div>
+  </section>
+
+  <!-- 右：登记卡 -->
+  <section class="login-right">
+    <div class="login-card">
+      <div id="form-view">
+        <h2 id="view-title">老同学，请进门</h2>
+        <p class="sub" id="view-sub">报上你是 <b>几几级</b> 的 <b>谁谁谁</b>，再加上自己的密码。</p>
+
+        <div class="form-error" id="form-error"></div>
+        <div class="form-hint-box hidden" id="form-hint"></div>
+
+        <div class="auth-tabs" id="auth-tabs">
+          <button type="button" data-mode="login" class="on">老同学 登录</button>
+          <button type="button" data-mode="register">第一次来 · 登记</button>
+        </div>
+
+        <!-- 登录：原生表单提交，浏览器才能记住密码 -->
+        <form id="login-form" class="auth-form" method="post" action="/api/login" autocomplete="on">
+          <div class="field">
+            <label for="login-who">几几级的谁谁谁</label>
+            <input class="input" id="login-who" name="who" type="text" required
+                   autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"
+                   maxlength="40" placeholder="1995级 张三">
+            <div class="hint" id="login-who-hint">
+              格式：<b>届别 + 姓名</b>，例如「1995级 张三」「95级3班张三」。
+              浏览器（Chrome / Edge / Firefox / Safari）会把这个框和密码一起记住，下次自动填。
+            </div>
+          </div>
+          <div class="field">
+            <label for="login-password">密码</label>
+            <div class="pw-row">
+              <input class="input" id="login-password" name="password" type="password" required
+                     autocomplete="current-password" maxlength="72" placeholder="只有你自己知道">
+              <button type="button" class="btn ghost small pw-eye" data-eye="login-password">显示</button>
+            </div>
+          </div>
+          <button class="btn block" type="submit">进 门</button>
+          <div class="login-foot">
+            <span>登录后 30 天内不用再登</span>
+            <a href="/wall.html">先随便逛逛 →</a>
+          </div>
+        </form>
+
+        <!-- 登记：同样是原生表单 -->
+        <form id="register-form" class="auth-form hidden" method="post" action="/api/register" autocomplete="on">
+          <div class="field">
+            <label for="reg-who">几几级的谁谁谁</label>
+            <input class="input" id="reg-who" name="who" type="text" required
+                   autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"
+                   maxlength="40" placeholder="1995级 张三">
+            <div class="hint" id="reg-who-hint">写全一点：届别（哪年入学）+ 姓名。班里人多可以带上班级，例如「1995级3班张三」。</div>
+          </div>
+          <div class="field">
+            <label for="reg-class">班级 <span class="muted">（选填）</span></label>
+            <input class="input" id="reg-class" name="className" type="text" inputmode="numeric"
+                   maxlength="2" placeholder="例如 3（填 3 就是 3 班）" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="reg-password">设置密码</label>
+            <div class="pw-row">
+              <input class="input" id="reg-password" name="password" type="password" required
+                     autocomplete="new-password" maxlength="72" placeholder="设一个自己记得住的">
+              <button type="button" class="btn ghost small pw-eye" data-eye="reg-password">显示</button>
+            </div>
+            <div class="hint" id="reg-pwd-hint">没有复杂要求，够自己记住就行。忘了可以找站长重置。</div>
+          </div>
+          <div class="field">
+            <label for="reg-password2">再输一遍</label>
+            <input class="input" id="reg-password2" name="password2" type="password" required
+                   autocomplete="new-password" maxlength="72" placeholder="两个要一样">
+          </div>
+          <button class="btn block" type="submit">登记并进门</button>
+          <div class="login-foot">
+            <span>登记过的老同学请用「登录」</span>
+            <a href="/wall.html">先随便逛逛 →</a>
+          </div>
+        </form>
+
+        <!-- 联系站长：后台填了联系方式才显示，没填就整块藏起来 -->
+        <div class="contact-box hidden" id="contact-box">
+          <button type="button" class="contact-toggle" id="contact-toggle"
+                  aria-expanded="false" aria-controls="contact-panel">
+            <span>忘记密码 / 有事找站长</span>
+            <span class="contact-caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="contact-panel hidden" id="contact-panel">
+            <div class="contact-head">站长联系方式</div>
+            <div class="contact-list" id="contact-list"></div>
+            <div class="contact-note hidden" id="contact-note"></div>
+            <div class="contact-tip">加好友或留言时，请写明「<b>几几级 姓名</b>」，方便核对身份。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 已登录 -->
+      <div id="welcome-view" class="hidden">
+        <h2>欢迎回来</h2>
+        <p class="sub" id="welcome-sub">你已经登录过了。</p>
+        <div class="form-hint-box hidden" id="welcome-must"></div>
+        <a class="btn block" href="/wall.html">进入回忆墙</a>
+        <div class="login-foot">
+          <span id="welcome-who"></span>
+          <a href="/account.html">账号设置</a>
+        </div>
+        <div class="login-foot" style="margin-top:8px">
+          <button class="btn ghost tiny" id="switch-user">换个身份</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="/assets/common.js"></script>
+<script src="/assets/login.js"></script>
+</body>
+</html>

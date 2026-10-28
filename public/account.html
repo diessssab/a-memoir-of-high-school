@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page="账号设置">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>账号设置 · 廊坊一中回忆录</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%232f4a3c'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle' fill='%23bf9a4e' font-family='serif'%3E记%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="topbar"></header>
+
+<main class="page-wrap" style="max-width:720px">
+  <div class="wall-head">
+    <h1>账号设置</h1>
+    <div class="sub">这里可以改自己的密码。改完以后，其它设备上的登录会失效。</div>
+  </div>
+
+  <div class="panel hidden" id="signin-panel">
+    <h3>还没登录</h3>
+    <div class="panel-sub">先用「几几级的谁谁谁」和密码进门。</div>
+    <a class="btn" href="/index.html">去登录 / 登记</a>
+  </div>
+
+  <div class="panel hidden" id="who-panel">
+    <h3>你的身份</h3>
+    <div class="panel-sub">登记时留下的信息，站长在后台能看到这份身份名册。</div>
+    <div class="kv" id="who-info"></div>
+    <div class="form-hint-box hidden" id="must-box"></div>
+  </div>
+
+  <form class="panel hidden" id="pwd-form" autocomplete="on">
+    <h3>修改密码</h3>
+    <div class="panel-sub" id="pwd-sub">旧密码 + 新密码，两次输入一致就行。</div>
+
+    <div class="field">
+      <label for="old-pwd">现在的密码</label>
+      <div class="pw-row">
+        <input class="input" id="old-pwd" name="oldPassword" type="password"
+               autocomplete="current-password" maxlength="72" required placeholder="原来的那个">
+        <button type="button" class="btn ghost small pw-eye" data-eye="old-pwd">显示</button>
+      </div>
+      <div class="hint" id="old-hint">原来没设过密码的可以直接留空。</div>
+    </div>
+
+    <div class="field">
+      <label for="new-pwd">新密码</label>
+      <div class="pw-row">
+        <input class="input" id="new-pwd" name="newPassword" type="password"
+               autocomplete="new-password" maxlength="72" required placeholder="自己记得住就行">
+        <button type="button" class="btn ghost small pw-eye" data-eye="new-pwd">显示</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="new-pwd2">再输一遍</label>
+      <input class="input" id="new-pwd2" name="newPassword2" type="password"
+             autocomplete="new-password" maxlength="72" required placeholder="两个要一样">
+    </div>
+
+    <div class="form-error" id="pwd-error"></div>
+
+    <div class="row wrap" style="gap:10px">
+      <button class="btn" type="submit" id="save-pwd">保存新密码</button>
+      <a class="btn ghost" href="/wall.html">回回忆墙</a>
+      <span class="spacer"></span>
+      <button class="btn ghost small" type="button" id="logout">退出登录</button>
+    </div>
+  </form>
+</main>
+
+<footer class="footer">
+  <div class="seal">廊坊一中</div>
+  <div>忘记密码了？找站长（后台「密码管控」里可以生成临时密码）</div>
+</footer>
+
+<script src="/assets/common.js"></script>
+<script src="/assets/account.js"></script>
+</body>
+</html>

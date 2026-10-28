@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "启动网站（F5）",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/index.js",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": { "PORT": "3000" },
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "启动网站（改代码自动重启）",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["--watch"],
+      "program": "${workspaceFolder}/server/index.js",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": { "PORT": "3000" },
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page="监控中心">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>监控中心 · 廊坊一中回忆录</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%23a8342a'/%3E%3Ctext x='50' y='70' font-size='52' text-anchor='middle' fill='%23f6f1e4' font-family='serif'%3E监%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="login-card">
+    <h2>监控中心</h2>
+    <p class="sub">只有站长能进。用后台密码登录。</p>
+    <div class="form-error" id="gate-error"></div>
+    <div class="field">
+      <label for="admin-pwd">管理密码</label>
+      <input class="input" id="admin-pwd" type="password" placeholder="输入管理密码" autocomplete="current-password">
+    </div>
+    <button class="btn block" id="gate-btn">进入监控</button>
+    <div class="login-foot">
+      <span>看谁在线、谁传了什么</span>
+      <a href="/admin.html">回后台 →</a>
+    </div>
+  </div>
+</div>
+
+<div id="shell" class="hidden">
+  <header class="topbar">
+    <a class="brand" href="/admin.html">廊坊一中回忆录<small>MONITOR</small></a>
+    <nav>
+      <a href="/admin.html">← 回后台</a>
+      <a href="/wall.html">前台</a>
+    </nav>
+    <span class="spacer"></span>
+    <div class="me">
+      <span class="live-dot"></span>
+      <span id="pulse" class="mono" style="font-size:12px">正在监测…</span>
+      <label class="auto-label"><input type="checkbox" id="auto-refresh" checked> 自动刷新</label>
+      <button class="btn ghost small" id="refresh-btn">刷新</button>
+      <button class="btn ghost small" id="logout-btn">退出</button>
+    </div>
+  </header>
+
+  <main class="page-wrap">
+    <div class="wall-head">
+      <h1>监控中心</h1>
+      <div class="sub">谁在线、在干什么、传了什么文件 —— 都在这一个页面。</div>
+    </div>
+
+    <div class="stat-grid" id="m-stats"></div>
+
+    <div class="mon-grid">
+      <div class="panel">
+        <h3>此刻在线的人 <span class="tag gray" id="online-count">0</span></h3>
+        <div class="panel-sub">近 5 分钟有过访问就算在线；同一网络未登录的访客合并成一类。</div>
+        <div class="scroll-y" id="online-list"><div class="empty">正在读…</div></div>
+      </div>
+      <div class="panel">
+        <h3>刚刚发生的事</h3>
+        <div class="panel-sub">登录、上传、提交、发帖、被拦、被锁，按时间倒序。</div>
+        <div class="scroll-y" id="activity"><div class="empty">正在读…</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>文件监控</h3>
+      <div class="panel-sub">校友上传的、站长导入的，全部登记在这里。点「看内容」能看到文件里究竟写了什么。</div>
+      <div class="row wrap" style="margin-bottom:14px">
+        <input class="input" id="f-q" placeholder="搜文件名 / 上传人 / IP" style="max-width:250px">
+        <select class="select" id="f-status" style="max-width:150px">
+          <option value="">全部状态</option>
+          <option value="ready">已上传未发布</option>
+          <option value="published">已发布上墙</option>
+          <option value="imported">站长导入</option>
+          <option value="failed">解析失败</option>
+        </select>
+        <span class="spacer"></span>
+        <span class="muted" id="f-count" style="font-size:12px"></span>
+      </div>
+      <div class="table-wrap">
+        <table class="data" id="file-table">
+          <thead>
+            <tr>
+              <th>文件</th><th>谁传的</th><th>大小</th><th>条目</th><th>状态</th><th>时间</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="file-body"><tr><td colspan="7" class="empty">正在读…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-mask" id="file-modal">
+  <div class="modal wide">
+    <button class="close-x" data-close>×</button>
+    <h2 id="fm-title">文件内容</h2>
+    <p class="modal-sub" id="fm-meta">—</p>
+    <div id="fm-warn"></div>
+    <div id="fm-actions" class="row wrap" style="margin:6px 0 14px"></div>
+    <div class="fm-body" id="fm-body"></div>
+  </div>
+</div>
+
+<script src="/assets/common.js"></script>
+<script src="/assets/monitor.js"></script>
+</body>
+</html>

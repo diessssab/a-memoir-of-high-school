@@ -1,0 +1,31 @@
+{
+  "name": "langfang-memoir",
+  "version": "1.0.0",
+  "private": true,
+  "description": "廊坊一中回忆录 —— 校友回忆墙 + 后台访客监控",
+  "license": "MIT",
+  "keywords": [
+    "express",
+    "school",
+    "alumni",
+    "memoir",
+    "guestbook"
+  ],
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "backup": "node scripts/backup.js",
+    "smoke": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke.ps1",
+    "test:docx": "node scripts/test-docx.js"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mammoth": "^1.8.0",
+    "multer": "^2.0.0",
+    "yauzl": "^3.4.0"
+  }
+}
